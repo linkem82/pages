@@ -17,7 +17,7 @@ spec:
         app: pages
     spec:
       containers:
-        - image: emiliosellitto/pages:[tag]
+        - image: emiliosellitto/pages:1.0
           name: pages
           ports:
             - containerPort: 8080
