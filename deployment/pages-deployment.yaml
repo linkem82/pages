@@ -4,6 +4,7 @@ metadata:
   labels:
     app: pages
     tier: service
+    
   name: pages
   namespace: camden
 spec:
