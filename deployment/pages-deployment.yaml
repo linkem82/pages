@@ -4,7 +4,6 @@ metadata:
   labels:
     app: pages
     tier: service
-    
   name: pages
   namespace: camden
 spec:
@@ -20,8 +19,12 @@ spec:
         app: pages
         tier: service
     spec:
+      volumes:
+        - name: node-dir
+          hostPath:
+            path: /camden
       containers:
-        - image: emiliosellitto/pages:service
+        - image: emiliosellitto/pages:monitor
           name: pages
           ports:
             - containerPort: 8080
@@ -32,7 +35,7 @@ spec:
                   name: pages-config-map
                   key: PAGE_CONTENT
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://pages-mysql/pages
+              value: jdbc:mysql://pages-mysql/pages?useSSL=false
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -40,3 +43,27 @@ spec:
                 secretKeyRef:
                   name: mysql-pass
                   key: password
+            - name: DEBUG
+              value: "true"
+            - name: LOGGING_FILE_NAME
+              value: "camden/logs/app.log"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+              value: debug
+            - name: LOGGING_LEVEL_ROOT
+              value: debug
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "*"
+          volumeMounts:
+            - name: node-dir
+              mountPath: /camden
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
